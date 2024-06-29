@@ -1,7 +1,9 @@
 import {
   addParamToUrl,
   baseUrl,
+  calculateRelativeTime,
   getFromLocalStorage,
+  getParamFromUrl,
   getPosts,
   getPostsCategories,
 } from '../utils/shared';
@@ -9,7 +11,7 @@ import {
 const $ = document;
 window.addEventListener('load', () => {
   const loadingContainer = $.querySelector('#loading-container');
-
+  const categoryID = getParamFromUrl('categoryID');
   const cities = getFromLocalStorage('cities');
 
   console.log(cities);
@@ -27,6 +29,7 @@ window.addEventListener('load', () => {
     if (posts.length) {
       posts.forEach((post) => {
         // console.log(post);
+        const date = calculateRelativeTime(post.updatedAt);
         postsContainer.insertAdjacentHTML(
           'beforeend',
           `
@@ -47,10 +50,7 @@ window.addEventListener('load', () => {
                             : post.price.toLocaleString() + ' تومان'
                         }
                       </span>
-                      <span class="product-card__time">${post.updatedAt.slice(
-                        0,
-                        10
-                      )}</span>
+                      <span class="product-card__time">${date}</span>
                     </div>
                   </div>
                   <div class="product-card__left">
@@ -87,23 +87,34 @@ window.addEventListener('load', () => {
     loadingContainer.style.display = 'none';
 
     categoriesContainer.innerHTML = '';
-
-    categories.forEach((category) => {
-      categoriesContainer.insertAdjacentHTML(
-        'beforeend',
-
-        `
-        <div class="sidebar__category-link" id="category-${category._id}">
-          <div class="sidebar__category-link_details" onclick="categoryClickHandler('${category._id}')">
-            <i class="sidebar__category-icon bi bi-house"></i>
-            <p>${category.title}</p>
-          </div>
-        </div>
-
-      
-      
-      `
+    if (categoryID) {
+      const categoryInfo = categories.filter(
+        (category) => category._id === categoryID
       );
-    });
+
+      if (!categoryInfo) {
+        ///code
+      } else {
+        ///code
+      }
+    } else {
+      categories.forEach((category) => {
+        categoriesContainer.insertAdjacentHTML(
+          'beforeend',
+
+          `
+       <div class="sidebar__category-link" id="category-${category._id}">
+       <div class="sidebar__category-link_details" onclick="categoryClickHandler('${category._id}')">
+       <i class="sidebar__category-icon bi bi-house"></i>
+       <p>${category.title}</p>
+       </div>
+       </div>
+       
+       
+       
+       `
+        );
+      });
+    }
   });
 });

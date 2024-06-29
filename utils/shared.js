@@ -45,6 +45,25 @@ const getPostsCategories = async () => {
   const result = await res.json();
   return result.data.categories;
 };
+const getParamFromUrl = (key) => {
+  const urlParams = new URLSearchParams(location.href);
+  return urlParams.get(key);
+};
+
+const calculateRelativeTime = (createdAt) => {
+  const currentTime = new Date();
+  const createdTime = new Date(createdAt);
+  const timeDifference = currentTime - createdTime;
+  const hours = Math.floor(timeDifference / (60 * 60 * 1000));
+
+  if (hours < 24) {
+    return `${hours} ساعت پیش`;
+  } else {
+    const days = Math.floor(hours / 24);
+
+    return `${days} روز پیش`;
+  }
+};
 
 const addParamToUrl = (param, value) => {
   const url = new URL(location.href);
@@ -62,4 +81,6 @@ export {
   getPosts,
   getPostsCategories,
   addParamToUrl,
+  calculateRelativeTime,
+  getParamFromUrl,
 };
