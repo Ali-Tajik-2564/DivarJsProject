@@ -46,7 +46,7 @@ const getPostsCategories = async () => {
   return result.data.categories;
 };
 const getParamFromUrl = (key) => {
-  const urlParams = new URLSearchParams(location.href);
+  const urlParams = new URLSearchParams(location.search);
   return urlParams.get(key);
 };
 
@@ -72,6 +72,12 @@ const addParamToUrl = (param, value) => {
   url.search = searchParams.toString();
   location.href = url.toString();
 };
+const removeParamFromUrl = (param) => {
+  const url = new URL(location.href);
+  url.searchParams.delete(param);
+  window.history.replaceState(null, null, url);
+  location.reload();
+};
 export {
   baseUrl,
   getAllCities,
@@ -83,4 +89,5 @@ export {
   addParamToUrl,
   calculateRelativeTime,
   getParamFromUrl,
+  removeParamFromUrl,
 };
