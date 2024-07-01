@@ -13,6 +13,7 @@ const $ = document;
 
 window.addEventListener('load', () => {
   const categoryID = getParamFromUrl('categoryID');
+  const searchValue = getParamFromUrl('value');
   const loadingContainer = document.querySelector('#loading-container');
 
   const cities = getFromLocalStorage('cities');
@@ -102,7 +103,9 @@ window.addEventListener('load', () => {
 
       if (!categoryInfos.length) {
         const subCategory = findSubCategoryById(categories, categoryID);
-        console.log(subCategory);
+
+        subCategory.filters.forEach((filter) => filterGenerator(filter));
+
         if (subCategory) {
           categoriesContainer.insertAdjacentHTML(
             'beforeend',
@@ -190,4 +193,79 @@ window.addEventListener('load', () => {
       (subCategory) => subCategory._id === categoryID
     );
   };
+  const filterGenerator = (filter) => {
+    console.log('Filter ->', filter);
+    const sidebarFiltersContainer = document.querySelector('#sidebar-filters');
+
+    sidebarFiltersContainer.insertAdjacentHTML(
+      'beforebegin',
+      `
+        ${
+          filter.type === 'selectbox'
+            ? `
+                <div class="accordion accordion-flush" id="accordionFlushExample">
+                  <div class="accordion-item">
+                    <h2 class="accordion-header">
+                      <button
+                        class="accordion-button collapsed"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#accordion-${filter.slug}"
+                        aria-expanded="false"
+                        aria-controls="accordion-${filter.name}"
+                      >
+                        <span class="sidebar__filter-title">${
+                          filter.name
+                        }</span>
+                      </button>
+                    </h2>
+                    <div
+                      id="accordion-${filter.slug}"
+                      class="accordion-collapse collapse"
+                      aria-labelledby="accordion-${filter.name}"
+                      data-bs-parent="#accordionFlushExample"
+                    >
+                      <div class="accordion-body">
+                        <select class="selectbox">
+                          ${filter.options
+                            .sort((a, b) => b - a)
+                            .map(
+                              (option) =>
+                                `<option value='${option}'>${option}</option>`
+                            )}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `
+            : ''
+        }
+
+        ${
+          filter.type === 'checkbox'
+            ? `
+                <div class="sidebar__filter">
+                  <label class="switch">
+                    <input id="exchange_controll" class="icon-controll" type="checkbox" />
+                    <span class="slider round"></span>
+                  </label>
+                  <p>${filter.name}</p>
+                </div>
+              `
+            : ''
+        }
+      `
+    );
+  };
+
+  const removeSearchValueIcon = $.querySelector('#remove-search-value-icon');
+  if (searchValue) {
+    const searchInput = $.querySelector('#global_search_input');
+    searchInput.value = searchValue;
+    removeSearchValueIcon.style.display = 'block';
+  }
+  removeSearchValueIcon.addEventListener('click', () => {
+    removeParamFromUrl('value');
+  });
 });
