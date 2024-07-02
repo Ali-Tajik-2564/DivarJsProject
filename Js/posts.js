@@ -42,7 +42,7 @@ window.addEventListener('load', () => {
                   </div>
                   <div class="product-card__right-bottom">
                     <span class="product-card__condition">${
-                      post.dynamicFields[0].data
+                      post.dynamicFields[0]?.data
                     }</span>
                     <span class="product-card__price">
                       ${
@@ -84,6 +84,7 @@ window.addEventListener('load', () => {
   window.categoryClickHandler = (categoryID) => {
     addParamToUrl('categoryID', categoryID);
   };
+
   window.backToAllCategories = () => {
     removeParamFromUrl('categoryID');
   };
@@ -94,24 +95,22 @@ window.addEventListener('load', () => {
 
     categoriesContainer.innerHTML = '';
 
-    console.log(categoryID);
     if (categoryID) {
       const categoryInfos = categories.filter(
         (category) => category._id === categoryID
       );
-      console.log('categoryInfos ->', categoryInfos);
 
       if (!categoryInfos.length) {
         const subCategory = findSubCategoryById(categories, categoryID);
 
-        subCategory.filters.forEach((filter) => filterGenerator(filter));
+        subCategory?.filters.forEach((filter) => filterGenerator(filter));
 
         if (subCategory) {
           categoriesContainer.insertAdjacentHTML(
             'beforeend',
             `
-                <div class="all-categories">
-                  <p onclick="backToAllCategories()">همه اگهی ها</p>
+                <div class="all-categories" onclick="backToAllCategories()">
+                  <p>همه اگهی ها</p>
                   <i class="bi bi-arrow-right"></i>
                 </div>
                 <div
@@ -132,14 +131,44 @@ window.addEventListener('load', () => {
             `
           );
         } else {
+          const subSubCategory = findSubSubCategoryById(categories, categoryID);
+          const subSubCategoryParent = findSubCategoryById(
+            categories,
+            subSubCategory.parent
+          );
+
+          subSubCategory?.filters.forEach((filter) => filterGenerator(filter));
+
+          categoriesContainer.insertAdjacentHTML(
+            'beforeend',
+            `
+              <div class="all-categories" onclick="backToAllCategories()">
+                <p>همه اگهی ها</p>
+                <i class="bi bi-arrow-right"></i>
+              </div>
+              <div class="sidebar__category-link active-category" href="#" onclick="categoryClickHandler('${
+                subSubCategoryParent._id
+              }')">
+                <div class="sidebar__category-link_details">
+                  <i class="sidebar__category-icon bi bi-house"></i>
+                  <p>${subSubCategoryParent.title}</p>
+                </div>
+                <ul class="subCategory-list">
+                  ${subSubCategoryParent.subCategories
+                    .map(createSubCategoryHtml)
+                    .join('')}
+                </ul>
+              </div>
+            `
+          );
         }
       } else {
         categoryInfos.forEach((category) => {
           categoriesContainer.insertAdjacentHTML(
             'beforeend',
             `
-              <div class="all-categories">
-                <p onclick="backToAllCategories()">همه اگهی ها</p>
+              <div class="all-categories" onclick="backToAllCategories()">
+                <p>همه اگهی ها</p>
                 <i class="bi bi-arrow-right"></i>
               </div>
 
@@ -176,14 +205,14 @@ window.addEventListener('load', () => {
 
   const createSubCategoryHtml = (subCategory) => {
     return `
-    <li class="${categoryID === subCategory._id ? 'active-subCategory' : ''}"
-    onclick="categoryClickHandler('${subCategory._id}')"
-  >
-    ${subCategory.title}
-  </li>
-
+      <li class="${categoryID === subCategory._id ? 'active-subCategory' : ''}"
+        onclick="categoryClickHandler('${subCategory._id}')"
+      >
+        ${subCategory.title}
+      </li>
     `;
   };
+
   const findSubCategoryById = (categories, categoryID) => {
     const allSubCategories = categories.flatMap(
       (category) => category.subCategories
@@ -193,6 +222,21 @@ window.addEventListener('load', () => {
       (subCategory) => subCategory._id === categoryID
     );
   };
+
+  const findSubSubCategoryById = (categories, categoryID) => {
+    const allSubCategories = categories.flatMap(
+      (category) => category.subCategories
+    );
+
+    const allSubSubCategories = allSubCategories.flatMap(
+      (subCategory) => subCategory.subCategories
+    );
+
+    return allSubSubCategories.find(
+      (subSubCategory) => subSubCategory._id === categoryID
+    );
+  };
+
   const filterGenerator = (filter) => {
     console.log('Filter ->', filter);
     const sidebarFiltersContainer = document.querySelector('#sidebar-filters');
@@ -259,12 +303,16 @@ window.addEventListener('load', () => {
     );
   };
 
-  const removeSearchValueIcon = $.querySelector('#remove-search-value-icon');
+  const removeSearchValueIcon = document.querySelector(
+    '#remove-search-value-icon'
+  );
+
   if (searchValue) {
-    const searchInput = $.querySelector('#global_search_input');
+    const searchInput = document.querySelector('#global_search_input');
     searchInput.value = searchValue;
     removeSearchValueIcon.style.display = 'block';
   }
+
   removeSearchValueIcon.addEventListener('click', () => {
     removeParamFromUrl('value');
   });

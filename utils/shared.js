@@ -29,7 +29,16 @@ const getAndShowSocials = async () => {
   });
 };
 const getPosts = async (citiesId) => {
-  const url = `${baseUrl}/v1/post/?city=${citiesId}`;
+  const categoryID = getParamFromUrl('categoryID');
+  const searchValue = getParamFromUrl('value');
+  let url = `${baseUrl}/v1/post/?city=${citiesId}`;
+
+  if (categoryID) {
+    url += `&categoryId=${categoryID}`;
+  }
+  if (searchValue) {
+    url += `&search=${searchValue}`;
+  }
   const res = await fetch(url);
   const posts = await res.json();
   return posts;
