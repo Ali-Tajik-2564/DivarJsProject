@@ -17,17 +17,20 @@ window.addEventListener('load', () => {
   const loadingContainer = document.querySelector('#loading-container');
 
   const cities = getFromLocalStorage('cities');
-
+  let posts = null;
+  let backupPosts = null;
   getPosts(cities[0].id).then((response) => {
     loadingContainer.style.display = 'none';
 
-    const posts = response.data.posts;
+    posts = response.data.posts;
+    backupPosts = response.data.posts;
 
     generatePosts(posts);
   });
 
   const generatePosts = (posts) => {
     const postsContainer = document.querySelector('#posts-container');
+    postsContainer.innerHTML = '';
     if (posts.length) {
       posts.forEach((post) => {
         const date = calculateRelativeTime(post.createdAt);
@@ -315,5 +318,27 @@ window.addEventListener('load', () => {
 
   removeSearchValueIcon.addEventListener('click', () => {
     removeParamFromUrl('value');
+  });
+
+  const justPhotoController = $.querySelector('#just_photo_controll');
+  const exchangeController = $.querySelector('#exchange_controll');
+
+  const applyFilters = (posts) => {
+    let filteredPosts = backupPosts;
+
+    if (justPhotoController.checked) {
+      filteredPosts = filteredPosts.filter((post) => post.pics.length);
+    }
+    if (exchangeController.checked) {
+      filteredPosts = filteredPosts.filter((post) => post.exchange);
+    }
+    generatePosts(filteredPosts);
+  };
+
+  justPhotoController.addEventListener('change', () => {
+    applyFilters(posts);
+  });
+  exchangeController.addEventListener('change', () => {
+    applyFilters(posts);
   });
 });

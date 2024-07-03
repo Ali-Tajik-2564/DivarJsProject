@@ -87,6 +87,14 @@ const removeParamFromUrl = (param) => {
   window.history.replaceState(null, null, url);
   location.reload();
 };
+const showModal = (id, className) => {
+  const element = $.querySelector(`#${id}`);
+  element?.classList.add(className);
+};
+const hideModal = (id, className) => {
+  const element = $.querySelector(`#${id}`);
+  element?.classList.remove(className);
+};
 export {
   baseUrl,
   getAllCities,
@@ -99,4 +107,6 @@ export {
   calculateRelativeTime,
   getParamFromUrl,
   removeParamFromUrl,
+  showModal,
+  hideModal,
 };
