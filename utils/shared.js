@@ -73,6 +73,28 @@ const calculateRelativeTime = (createdAt) => {
     return `${days} روز پیش`;
   }
 };
+const getAndShowHeaderCities = () => {
+  const headerCityTitle = $.querySelector('#header-city-title');
+  const cities = getFromLocalStorage('cities');
+  if (!cities) {
+    saveInLocalStorage('cities', [{ name: 'تهران', id: 301 }]);
+    const cities = getFromLocalStorage('cities');
+    headerCityTitle.innerHTML = cities[0].name;
+  } else {
+    if (cities.length === 1) {
+      headerCityTitle.innerHTML = cities[0].name;
+    } else {
+      headerCityTitle.innerHTML = `${cities.length} شهر`;
+    }
+  }
+};
+
+const getAllLocations = async () => {
+  const res = await fetch(`${baseUrl}/v1/location`);
+  const respose = await res.json();
+
+  return respose.data;
+};
 
 const addParamToUrl = (param, value) => {
   const url = new URL(location.href);
@@ -109,4 +131,6 @@ export {
   removeParamFromUrl,
   showModal,
   hideModal,
+  getAndShowHeaderCities,
+  getAllLocations,
 };

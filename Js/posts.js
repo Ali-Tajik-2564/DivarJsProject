@@ -19,6 +19,7 @@ window.addEventListener('load', () => {
   const cities = getFromLocalStorage('cities');
   let posts = null;
   let backupPosts = null;
+  let appliedFilters = {};
   getPosts(cities[0].id).then((response) => {
     loadingContainer.style.display = 'none';
 
@@ -273,7 +274,9 @@ window.addEventListener('load', () => {
                       data-bs-parent="#accordionFlushExample"
                     >
                       <div class="accordion-body">
-                        <select class="selectbox">
+                        <select class="selectbox" onchange="selectBoxFilterHandler(event.target.value , '${
+                          filter.slug
+                        }')">
                           ${filter.options
                             .sort((a, b) => b - a)
                             .map(
@@ -322,9 +325,20 @@ window.addEventListener('load', () => {
 
   const justPhotoController = $.querySelector('#just_photo_controll');
   const exchangeController = $.querySelector('#exchange_controll');
+  const minPriceSelectBox = $.querySelector('#min-price-selectbox');
+  const maxPriceSelectBox = $.querySelector('#max-price-selectbox');
 
-  const applyFilters = (posts) => {
+  const applyFilters = () => {
     let filteredPosts = backupPosts;
+
+    for (const slug in appliedFilters) {
+      filteredPosts = filteredPosts.filter((post) =>
+        post.dynamicFields.some(
+          (field) => field.slug === slug && field.data === appliedFilters[slug]
+        )
+      );
+      console.log(filteredPosts);
+    }
 
     if (justPhotoController.checked) {
       filteredPosts = filteredPosts.filter((post) => post.pics.length);
@@ -332,13 +346,47 @@ window.addEventListener('load', () => {
     if (exchangeController.checked) {
       filteredPosts = filteredPosts.filter((post) => post.exchange);
     }
+
+    const minPrice = minPriceSelectBox.value;
+    const maxPrice = maxPriceSelectBox.value;
+    console.log(minPrice, maxPrice);
+
+    if (maxPrice !== 'default') {
+      if (minPrice !== 'default') {
+        filteredPosts = filteredPosts.filter(
+          (post) => post.price >= minPrice && post.price <= maxPrice
+        );
+      } else {
+        filteredPosts = filteredPosts.filter((post) => {
+          post.price <= maxPrice;
+        });
+      }
+    } else {
+      if (minPrice !== 'default') {
+        filteredPosts = filteredPosts.filter((post) => post.price >= minPrice);
+      }
+    }
+
     generatePosts(filteredPosts);
   };
 
+  minPriceSelectBox.addEventListener('change', (event) => {
+    applyFilters();
+  });
+  maxPriceSelectBox.addEventListener('change', (event) => {
+    applyFilters();
+  });
+
   justPhotoController.addEventListener('change', () => {
-    applyFilters(posts);
+    applyFilters();
   });
   exchangeController.addEventListener('change', () => {
-    applyFilters(posts);
+    applyFilters();
   });
+  window.selectBoxFilterHandler = (value, slug) => {
+    appliedFilters[slug] = value;
+    console.log({ ...appliedFilters });
+
+    applyFilters();
+  };
 });
