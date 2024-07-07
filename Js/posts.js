@@ -1,40 +1,44 @@
 import {
-  addParamToUrl,
   baseUrl,
-  calculateRelativeTime,
-  getFromLocalStorage,
-  getParamFromUrl,
+  getPostCategories,
   getPosts,
-  getPostsCategories,
+  addParamToUrl,
+  calcuteRelativeTimeDifference,
+  getFromLocalStorage,
+  getUrlParam,
   removeParamFromUrl,
 } from '../utils/shared';
 
-const $ = document;
-
 window.addEventListener('load', () => {
-  const categoryID = getParamFromUrl('categoryID');
-  const searchValue = getParamFromUrl('value');
+  const categoryID = getUrlParam('categoryID');
+  const searchValue = getUrlParam('value');
   const loadingContainer = document.querySelector('#loading-container');
 
   const cities = getFromLocalStorage('cities');
+
   let posts = null;
   let backupPosts = null;
-  let appliedFilters = {};
+  let appliedFilters = {}; // key-value karkard: 90 / tolid: 1396
+
   getPosts(cities[0].id).then((response) => {
     loadingContainer.style.display = 'none';
 
     posts = response.data.posts;
     backupPosts = response.data.posts;
 
+    console.log('Posts ->', posts);
+
     generatePosts(posts);
   });
 
   const generatePosts = (posts) => {
     const postsContainer = document.querySelector('#posts-container');
+
     postsContainer.innerHTML = '';
-    if (posts.length) {
+
+    if (posts?.length) {
       posts.forEach((post) => {
-        const date = calculateRelativeTime(post.createdAt);
+        const date = calcuteRelativeTimeDifference(post.createdAt);
         postsContainer.insertAdjacentHTML(
           'beforeend',
           `
@@ -93,7 +97,7 @@ window.addEventListener('load', () => {
     removeParamFromUrl('categoryID');
   };
 
-  getPostsCategories().then((categories) => {
+  getPostCategories().then((categories) => {
     const categoriesContainer = document.querySelector('#categories-container');
     loadingContainer.style.display = 'none';
 
@@ -274,7 +278,7 @@ window.addEventListener('load', () => {
                       data-bs-parent="#accordionFlushExample"
                     >
                       <div class="accordion-body">
-                        <select class="selectbox" onchange="selectBoxFilterHandler(event.target.value , '${
+                        <select class="selectbox" onchange="selectBoxFilterHandler(event.target.value, '${
                           filter.slug
                         }')">
                           ${filter.options
@@ -323,10 +327,10 @@ window.addEventListener('load', () => {
     removeParamFromUrl('value');
   });
 
-  const justPhotoController = $.querySelector('#just_photo_controll');
-  const exchangeController = $.querySelector('#exchange_controll');
-  const minPriceSelectBox = $.querySelector('#min-price-selectbox');
-  const maxPriceSelectBox = $.querySelector('#max-price-selectbox');
+  const justPhotoController = document.querySelector('#just_photo_controll');
+  const exchangeController = document.querySelector('#exchange_controll');
+  const minPriceSelectBox = document.querySelector('#min-price-selectbox');
+  const maxPriceSelectBox = document.querySelector('#max-price-selectbox');
 
   const applyFilters = () => {
     let filteredPosts = backupPosts;
@@ -337,29 +341,28 @@ window.addEventListener('load', () => {
           (field) => field.slug === slug && field.data === appliedFilters[slug]
         )
       );
-      console.log(filteredPosts);
     }
+
+    console.log('filteredPosts ->', filteredPosts);
 
     if (justPhotoController.checked) {
       filteredPosts = filteredPosts.filter((post) => post.pics.length);
     }
+
     if (exchangeController.checked) {
       filteredPosts = filteredPosts.filter((post) => post.exchange);
     }
 
+    // min / max price filtering
     const minPrice = minPriceSelectBox.value;
     const maxPrice = maxPriceSelectBox.value;
-    console.log(minPrice, maxPrice);
-
     if (maxPrice !== 'default') {
       if (minPrice !== 'default') {
         filteredPosts = filteredPosts.filter(
           (post) => post.price >= minPrice && post.price <= maxPrice
         );
       } else {
-        filteredPosts = filteredPosts.filter((post) => {
-          post.price <= maxPrice;
-        });
+        filteredPosts = filteredPosts.filter((post) => post.price <= maxPrice);
       }
     } else {
       if (minPrice !== 'default') {
@@ -370,22 +373,24 @@ window.addEventListener('load', () => {
     generatePosts(filteredPosts);
   };
 
-  minPriceSelectBox.addEventListener('change', (event) => {
-    applyFilters();
-  });
-  maxPriceSelectBox.addEventListener('change', (event) => {
+  minPriceSelectBox?.addEventListener('change', (event) => {
     applyFilters();
   });
 
-  justPhotoController.addEventListener('change', () => {
+  maxPriceSelectBox?.addEventListener('change', (event) => {
     applyFilters();
   });
-  exchangeController.addEventListener('change', () => {
+
+  justPhotoController.addEventListener('change', (event) => {
     applyFilters();
   });
+
+  exchangeController.addEventListener('change', (event) => {
+    applyFilters();
+  });
+
   window.selectBoxFilterHandler = (value, slug) => {
     appliedFilters[slug] = value;
-    console.log({ ...appliedFilters });
 
     applyFilters();
   };
