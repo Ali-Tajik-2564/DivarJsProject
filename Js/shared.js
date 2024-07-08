@@ -25,6 +25,8 @@ window.addEventListener('load', () => {
   const cityModalAcceptBtn = document.querySelector('.city-modal__accept');
   const cityModalCloseBtn = document.querySelector('.city-modal__close');
   const cityModalError = document.querySelector('#city_modal_error');
+  const cityModalOverlay = document.querySelector('.city_modal_overlay');
+  const cityModalCities = document.querySelector('.city_modal_cities');
 
   const searchbarModalOverlay = document.querySelector(
     '.searchbar__modal-overlay'
@@ -89,8 +91,17 @@ window.addEventListener('load', () => {
   };
 
   window.removeCityFromModal = (cityID) => {
-    console.log('CityID ->', cityID);
-    // Codes
+    const currentCity = document.querySelector(`#city-${cityID}`);
+    if (currentCity) {
+      const checkbox = currentCity.querySelector('input');
+      const checkboxShape = currentCity.querySelector('div');
+      checkbox.checked = false;
+      checkboxShape.classList.remove('active');
+    }
+
+    selectedCities = selectedCities.filter((city) => city.id !== cityID);
+    addCityToModal(selectedCities);
+    toggleCityModalBtns(selectedCities);
   };
 
   getAllLocations().then((data) => {
@@ -100,7 +111,7 @@ window.addEventListener('load', () => {
 
   const showProvinces = (data) => {
     citiesModalList.innerHTML = '';
-
+    cityModalCities.scrollTo(0, 0);
     data.provinces.forEach((province) => {
       citiesModalList.insertAdjacentHTML(
         'beforeend',
@@ -271,4 +282,34 @@ window.addEventListener('load', () => {
 
     showProvinces(allCities);
   });
+
+  cityModalOverlay?.addEventListener('click', () => {
+    hideModal('city-modal', 'city-modal--active');
+
+    cityModalAcceptBtn.classList.replace(
+      'city-modal__accept--active',
+      'city-modal__accept'
+    );
+    showProvinces(allCities);
+  });
+  deleteAllSelectedCities?.addEventListener('click', () => {
+    deSelectAllCities();
+    selectedCities = [];
+    addCityToModal(selectedCities);
+    cityModalAcceptBtn.classList.replace(
+      'city-modal__accept--active',
+      'city-modal__accept'
+    );
+    cityModalError.style.display = 'block';
+    deleteAllSelectedCities.style.display = 'none';
+  });
+  const deSelectAllCities = () => {
+    const cityElements = document.querySelectorAll('.city-item');
+    cityElements.foreEach((city) => {
+      const checkbox = cityElements.querySelector('input');
+      const checkboxShape = cityElements.querySelector('div');
+      checkbox.checked = false;
+      checkboxShape.classList.remove('active');
+    });
+  };
 });
