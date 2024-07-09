@@ -26,7 +26,10 @@ window.addEventListener('load', () => {
   const cityModalCloseBtn = document.querySelector('.city-modal__close');
   const cityModalError = document.querySelector('#city_modal_error');
   const cityModalOverlay = document.querySelector('.city_modal_overlay');
-  const cityModalCities = document.querySelector('.city_modal_cities');
+  const cityModalCities = document.querySelector('.city-modal__cities');
+  const cityModalSearchInput = document.querySelector(
+    '#city-modal-search-input'
+  );
 
   const searchbarModalOverlay = document.querySelector(
     '.searchbar__modal-overlay'
@@ -312,4 +315,33 @@ window.addEventListener('load', () => {
       checkboxShape.classList.remove('active');
     });
   };
+  cityModalSearchInput?.addEventListener('keyup', (event) => {
+    const FilteredCities = allCities.cities.filter((city) =>
+      city.name.startsWith(event.target.value)
+    );
+
+    if (event.target.value.trim() && FilteredCities.length) {
+      citiesModalList.innerHTML = '';
+      FilteredCities.forEach((city) => {
+        const isSelect = selectedCities.some(
+          (selectedCity) => selectedCity.title === city.name
+        );
+        citiesModalList.insertAdjacentHTML(
+          'beforeend',
+          `
+        <li class="city-modal__cities-item city-item" id="city-${city.id}">
+          <span>${city.name}</span>
+          <div id="checkboxShape" class="${isSelect && 'active'}"></div>
+          <input onchange="cityItemClickHandler('${
+            city.id
+          }')" id="city-item-checkbox" type="checkbox" checked="${isSelect}" />
+        </li>
+        `
+        );
+      });
+    } else {
+      citiesModalList.innerHTML = '';
+      showProvinces(allCities);
+    }
+  });
 });
