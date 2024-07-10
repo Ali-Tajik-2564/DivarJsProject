@@ -8,6 +8,8 @@ import {
   hideModal,
   saveInLocalStorage,
   showModal,
+  removeParamFromUrl,
+  getPostCategories,
 } from './../utils/shared';
 
 window.addEventListener('load', () => {
@@ -34,8 +36,73 @@ window.addEventListener('load', () => {
   const searchbarModalOverlay = document.querySelector(
     '.searchbar__modal-overlay'
   );
-
+  const HeaderCategoryBtn = document.querySelector('.header__category-btn');
+  const categoryModalOverlay = document.querySelector(
+    '.category_modal_overlay'
+  );
+  const categoriesList = document.querySelector('#categories-list');
+  const allCategoriesPosts = document.querySelector('#all-categories-posts');
   const mostSearchKeyWords = ['ماشین', 'ساعت', 'موبایل', 'لپ تاپ', 'تلویزیون'];
+
+  const categoryResults = document.querySelector('#category-results');
+
+  getPostCategories().then((categories) => {
+    console.log('Categories ->', categories);
+
+    categories.forEach((category) => {
+      categoriesList.insertAdjacentHTML(
+        'beforeend',
+        `
+          <li class="header__category-menu-item" onmouseenter="showActiveCategorySubs('${category._id}')">
+            <div class="header__category-menu-link">
+              <div class="header__category-menu-link-right">
+                <i class="header__category-menu-icon bi bi-house"></i>
+                ${category.title}
+              </div>
+              <div class="header__category-menu-link-left">
+                <i class="header__category-menu-arrow-icon bi bi-chevron-left"></i>
+              </div>
+            </div>
+          </li>
+        `
+      );
+    });
+    window.showActiveCategorySubs = (categoryID) => {
+      const category = categories.find(
+        (category) => category._id === categoryID
+      );
+
+      categoryResults.innerHTML = '';
+
+      category.subCategories.map((subCategory) => {
+        categoryResults.insertAdjacentHTML(
+          'beforeend',
+          `
+            <div>
+              <ul class="header__category-dropdown-list">
+                <div class="header__category-dropdown-title" onclick="categoryClickHandler('${
+                  subCategory._id
+                }')">${subCategory.title}</div>
+                ${subCategory.subCategories
+                  .map(
+                    (subSubCategory) => `
+                    <li class="header__category-dropdown-item">
+                      <div class="header__category-dropdown-link" onclick="categoryClickHandler('${subSubCategory._id}')">${subSubCategory.title}</div>
+                    </li>
+                  `
+                  )
+                  .join('')}
+              </ul>
+            </div>
+          `
+        );
+      });
+    };
+    showActiveCategorySubs(categories[0]._id);
+    window.categoryClickHandler = (categoryID) => {
+      addParamToUrl('categoryID', categoryID);
+    };
+  });
 
   globalSearchInput?.addEventListener('keyup', (event) => {
     if (event.keyCode === 13) {
@@ -343,5 +410,14 @@ window.addEventListener('load', () => {
       citiesModalList.innerHTML = '';
       showProvinces(allCities);
     }
+  });
+  HeaderCategoryBtn?.addEventListener('click', () => {
+    showModal('header__category-menu', 'header__category-menu--active');
+  });
+  categoryModalOverlay?.addEventListener('click', () => {
+    hideModal('header__category-menu', 'header__category-menu--active');
+  });
+  allCategoriesPosts?.addEventListener('click', () => {
+    removeParamFromUrl('categoryID');
   });
 });
