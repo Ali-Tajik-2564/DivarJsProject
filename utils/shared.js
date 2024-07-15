@@ -130,6 +130,11 @@ const hideModal = (id, className) => {
   const element = document.querySelector(`#${id}`);
   element?.classList.remove(className);
 };
+const showSwal = (title, button, icon, callback) => {
+  swal({ title, button, icon }).then((result) => {
+    callback(result);
+  });
+};
 const getPostDetails = async () => {
   const postID = getUrlParam('id');
 
@@ -137,6 +142,9 @@ const getPostDetails = async () => {
   const response = await res.json();
 
   return response.data.post;
+};
+const isLogin = () => {
+  return false;
 };
 
 export {
@@ -156,4 +164,6 @@ export {
   getPostCategories,
   getAndShowHeaderCityLocation,
   getPostDetails,
+  showSwal,
+  isLogin,
 };

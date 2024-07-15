@@ -1,3 +1,4 @@
+import { submitNumber } from '../utils/auth.js';
 import {
   getAllLocations,
   getAndShowHeaderCityLocation,
@@ -10,7 +11,7 @@ import {
   showModal,
   removeParamFromUrl,
   getPostCategories,
-} from './../utils/shared';
+} from './../utils/shared.js';
 
 window.addEventListener('load', () => {
   getAndShowSocials();
@@ -45,6 +46,13 @@ window.addEventListener('load', () => {
   const mostSearchKeyWords = ['ماشین', 'ساعت', 'موبایل', 'لپ تاپ', 'تلویزیون'];
 
   const categoryResults = document.querySelector('#category-results');
+  const submitPhoneNumberBtn = document.querySelector(
+    '.submit_phone_number_btn'
+  );
+  const loginModalOverlay = document.querySelector('.login_modal_overlay');
+  const loginModalCloseIcon = document.querySelector('.login-modal__icon');
+  console.log(loginModalOverlay);
+  console.log(loginModalCloseIcon);
 
   getPostCategories().then((categories) => {
     console.log('Categories ->', categories);
@@ -419,5 +427,18 @@ window.addEventListener('load', () => {
   });
   allCategoriesPosts?.addEventListener('click', () => {
     removeParamFromUrl('categoryID');
+  });
+
+  loginModalOverlay.addEventListener('click', () => {
+    hideModal('login-modal', 'login-modal--active');
+  });
+
+  loginModalCloseIcon.addEventListener('click', () => {
+    hideModal('login-modal', 'login-modal--active');
+  });
+
+  submitPhoneNumberBtn.addEventListener('click', (event) => {
+    event.preventDefault();
+    submitNumber();
   });
 });
