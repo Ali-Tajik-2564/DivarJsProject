@@ -1,17 +1,19 @@
-import { submitNumber } from '../utils/auth.js';
+import { submitNumber, verifyOtp } from '../utils/auth.js';
 import {
   getAllLocations,
   getAndShowHeaderCityLocation,
   getAndShowSocials,
+  getPostCategories,
+} from '../utils/shared.js';
+import {
   addParamToUrl,
   getFromLocalStorage,
   getUrlParam,
   hideModal,
+  removeParamFromUrl,
   saveInLocalStorage,
   showModal,
-  removeParamFromUrl,
-  getPostCategories,
-} from './../utils/shared.js';
+} from '../utils/utils.js';
 
 window.addEventListener('load', () => {
   getAndShowSocials();
@@ -28,31 +30,17 @@ window.addEventListener('load', () => {
   const cityModalAcceptBtn = document.querySelector('.city-modal__accept');
   const cityModalCloseBtn = document.querySelector('.city-modal__close');
   const cityModalError = document.querySelector('#city_modal_error');
-  const cityModalOverlay = document.querySelector('.city_modal_overlay');
+  const cityModalOverlay = document.querySelector('.city-modal__overlay');
   const cityModalCities = document.querySelector('.city-modal__cities');
-  const cityModalSearchInput = document.querySelector(
-    '#city-modal-search-input'
-  );
-
-  const searchbarModalOverlay = document.querySelector(
-    '.searchbar__modal-overlay'
-  );
-  const HeaderCategoryBtn = document.querySelector('.header__category-btn');
-  const categoryModalOverlay = document.querySelector(
-    '.category_modal_overlay'
-  );
-  const categoriesList = document.querySelector('#categories-list');
+  const headerCategoryBtn = document.querySelector('.header__category-btn');
   const allCategoriesPosts = document.querySelector('#all-categories-posts');
-  const mostSearchKeyWords = ['ماشین', 'ساعت', 'موبایل', 'لپ تاپ', 'تلویزیون'];
-
+  const categoriesList = document.querySelector('#categories-list');
   const categoryResults = document.querySelector('#category-results');
   const submitPhoneNumberBtn = document.querySelector(
     '.submit_phone_number_btn'
   );
-  const loginModalOverlay = document.querySelector('.login_modal_overlay');
-  const loginModalCloseIcon = document.querySelector('.login-modal__icon');
-  console.log(loginModalOverlay);
-  console.log(loginModalCloseIcon);
+
+  const loginBtn = document.querySelector('.login_btn');
 
   getPostCategories().then((categories) => {
     console.log('Categories ->', categories);
@@ -75,6 +63,7 @@ window.addEventListener('load', () => {
         `
       );
     });
+
     window.showActiveCategorySubs = (categoryID) => {
       const category = categories.find(
         (category) => category._id === categoryID
@@ -95,7 +84,7 @@ window.addEventListener('load', () => {
                   .map(
                     (subSubCategory) => `
                     <li class="header__category-dropdown-item">
-                      <div class="header__category-dropdown-link" onclick="categoryClickHandler('${subSubCategory._id}')">${subSubCategory.title}</div>
+                      <div onclick="categoryClickHandler('${subSubCategory._id}')" class="header__category-dropdown-link">${subSubCategory.title}</div>
                     </li>
                   `
                   )
@@ -106,11 +95,30 @@ window.addEventListener('load', () => {
         );
       });
     };
+
     showActiveCategorySubs(categories[0]._id);
-    window.categoryClickHandler = (categoryID) => {
+
+    window.categoryClickHandler = function (categoryID) {
       addParamToUrl('categoryID', categoryID);
     };
   });
+
+  const categoryModalOverlay = document.querySelector(
+    '.category_modal_overlay'
+  );
+
+  const cityModalSearchInput = document.querySelector(
+    '#city-modal-search-input'
+  );
+
+  const searchbarModalOverlay = document.querySelector(
+    '.searchbar__modal-overlay'
+  );
+
+  const loginModalOverlay = document.querySelector('.login_modal_overlay');
+  const loginModalCloseIcon = document.querySelector('.login-modal__icon');
+
+  const mostSearchKeyWords = ['ماشین', 'ساعت', 'موبایل', 'لپ تاپ', 'تلویزیون'];
 
   globalSearchInput?.addEventListener('keyup', (event) => {
     if (event.keyCode === 13) {
@@ -170,9 +178,11 @@ window.addEventListener('load', () => {
 
   window.removeCityFromModal = (cityID) => {
     const currentCity = document.querySelector(`#city-${cityID}`);
+
     if (currentCity) {
       const checkbox = currentCity.querySelector('input');
       const checkboxShape = currentCity.querySelector('div');
+
       checkbox.checked = false;
       checkboxShape.classList.remove('active');
     }
@@ -190,6 +200,7 @@ window.addEventListener('load', () => {
   const showProvinces = (data) => {
     citiesModalList.innerHTML = '';
     cityModalCities.scrollTo(0, 0);
+
     data.provinces.forEach((province) => {
       citiesModalList.insertAdjacentHTML(
         'beforeend',
@@ -327,6 +338,32 @@ window.addEventListener('load', () => {
     }
   };
 
+  deleteAllSelectedCities?.addEventListener('click', () => {
+    deSelectAllCitiesFromModal();
+    selectedCities = [];
+    addCityToModal(selectedCities);
+
+    cityModalAcceptBtn.classList.replace(
+      'city-modal__accept--active',
+      'city-modal__accept'
+    );
+
+    cityModalError.style.display = 'block';
+    deleteAllSelectedCities.style.display = 'none';
+  });
+
+  const deSelectAllCitiesFromModal = () => {
+    const cityElements = document.querySelectorAll('.city-item');
+
+    cityElements.forEach((city) => {
+      const checkbox = city.querySelector('input');
+      const checkboxShape = city.querySelector('div');
+
+      checkbox.checked = false;
+      checkboxShape.classList.remove('active');
+    });
+  };
+
   globalSearchInput?.addEventListener('click', () => {
     showModal(
       'header__searchbar-dropdown',
@@ -368,50 +405,34 @@ window.addEventListener('load', () => {
       'city-modal__accept--active',
       'city-modal__accept'
     );
+
     showProvinces(allCities);
   });
-  deleteAllSelectedCities?.addEventListener('click', () => {
-    deSelectAllCities();
-    selectedCities = [];
-    addCityToModal(selectedCities);
-    cityModalAcceptBtn.classList.replace(
-      'city-modal__accept--active',
-      'city-modal__accept'
-    );
-    cityModalError.style.display = 'block';
-    deleteAllSelectedCities.style.display = 'none';
-  });
-  const deSelectAllCities = () => {
-    const cityElements = document.querySelectorAll('.city-item');
-    cityElements.foreEach((city) => {
-      const checkbox = cityElements.querySelector('input');
-      const checkboxShape = cityElements.querySelector('div');
-      checkbox.checked = false;
-      checkboxShape.classList.remove('active');
-    });
-  };
+
   cityModalSearchInput?.addEventListener('keyup', (event) => {
-    const FilteredCities = allCities.cities.filter((city) =>
-      city.name.startsWith(event.target.value)
+    console.log(event.target.value);
+    const filteredCities = allCities.cities.filter((city) =>
+      city.name.includes(event.target.value)
     );
 
-    if (event.target.value.trim() && FilteredCities.length) {
+    if (event.target.value.trim() && filteredCities.length) {
       citiesModalList.innerHTML = '';
-      FilteredCities.forEach((city) => {
+      filteredCities.forEach((city) => {
         const isSelect = selectedCities.some(
           (selectedCity) => selectedCity.title === city.name
         );
+
         citiesModalList.insertAdjacentHTML(
           'beforeend',
           `
-        <li class="city-modal__cities-item city-item" id="city-${city.id}">
-          <span>${city.name}</span>
-          <div id="checkboxShape" class="${isSelect && 'active'}"></div>
-          <input onchange="cityItemClickHandler('${
-            city.id
-          }')" id="city-item-checkbox" type="checkbox" checked="${isSelect}" />
-        </li>
-        `
+            <li class="city-modal__cities-item city-item" id="city-${city.id}">
+              <span>${city.name}</span>
+              <div id="checkboxShape" class="${isSelect && 'active'}"></div>
+              <input onchange="cityItemClickHandler('${
+                city.id
+              }')" id="city-item-checkbox" type="checkbox" checked="${isSelect}">
+            </li>
+          `
         );
       });
     } else {
@@ -419,12 +440,25 @@ window.addEventListener('load', () => {
       showProvinces(allCities);
     }
   });
-  HeaderCategoryBtn?.addEventListener('click', () => {
+
+  submitPhoneNumberBtn.addEventListener('click', (event) => {
+    event.preventDefault();
+    submitNumber();
+  });
+
+  loginBtn.addEventListener('click', (event) => {
+    event.preventDefault();
+    verifyOtp();
+  });
+
+  headerCategoryBtn?.addEventListener('click', () => {
     showModal('header__category-menu', 'header__category-menu--active');
   });
+
   categoryModalOverlay?.addEventListener('click', () => {
     hideModal('header__category-menu', 'header__category-menu--active');
   });
+
   allCategoriesPosts?.addEventListener('click', () => {
     removeParamFromUrl('categoryID');
   });
@@ -435,10 +469,5 @@ window.addEventListener('load', () => {
 
   loginModalCloseIcon.addEventListener('click', () => {
     hideModal('login-modal', 'login-modal--active');
-  });
-
-  submitPhoneNumberBtn.addEventListener('click', (event) => {
-    event.preventDefault();
-    submitNumber();
   });
 });

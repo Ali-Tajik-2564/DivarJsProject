@@ -1,3 +1,10 @@
+import {
+  getFromLocalStorage,
+  getUrlParam,
+  getToken,
+  saveInLocalStorage,
+} from './utils.js';
+
 const baseUrl = 'https://divarapi.liara.run';
 
 const getAllCities = async () => {
@@ -76,86 +83,21 @@ const getPostCategories = async () => {
   return response.data.categories;
 };
 
-const saveInLocalStorage = (key, value) => {
-  localStorage.setItem(key, JSON.stringify(value));
-};
-
-const getFromLocalStorage = (key) => {
-  return JSON.parse(localStorage.getItem(key));
-};
-
-const addParamToUrl = (param, value) => {
-  const url = new URL(location.href);
-  const searchParams = url.searchParams;
-
-  searchParams.set(param, value);
-  url.search = searchParams.toString();
-
-  location.href = url.toString();
-};
-
-const getUrlParam = (param) => {
-  const urlParams = new URLSearchParams(location.search);
-  return urlParams.get(param);
-};
-
-const removeParamFromUrl = (param) => {
-  const url = new URL(location.href);
-  url.searchParams.delete(param);
-  window.history.replaceState(null, null, url);
-  location.reload();
-};
-
-const calcuteRelativeTimeDifference = (createdAt) => {
-  const currentTime = new Date();
-  const createdTime = new Date(createdAt);
-
-  const timeDifference = currentTime - createdTime;
-  const hours = Math.floor(timeDifference / (60 * 60 * 1000));
-
-  if (hours < 24) {
-    return `${hours} ساعت پیش`;
-  } else {
-    const days = Math.floor(hours / 24);
-    return `${days} روز پیش`;
-  }
-};
-
-const showModal = (id, className) => {
-  const element = document.querySelector(`#${id}`);
-  element?.classList.add(className);
-};
-
-const hideModal = (id, className) => {
-  const element = document.querySelector(`#${id}`);
-  element?.classList.remove(className);
-};
-const showSwal = (title, button, icon, callback) => {
-  swal({ title, button, icon }).then((result) => {
-    callback(result);
-  });
-};
 const getPostDetails = async () => {
   const postID = getUrlParam('id');
+  const token = getToken();
 
-  const res = await fetch(`${baseUrl}/v1/post/${postID}`);
+  const res = await fetch(`${baseUrl}/v1/post/${postID}`, {
+    headers: {
+      Authorization: token ? `Bearer ${token}` : null,
+    },
+  });
   const response = await res.json();
-
+  console.log(response.date);
   return response.data.post;
-};
-const isLogin = () => {
-  return false;
 };
 
 export {
-  saveInLocalStorage,
-  getFromLocalStorage,
-  addParamToUrl,
-  getUrlParam,
-  calcuteRelativeTimeDifference,
-  removeParamFromUrl,
-  showModal,
-  hideModal,
   baseUrl,
   getAllCities,
   getAllLocations,
@@ -164,6 +106,4 @@ export {
   getPostCategories,
   getAndShowHeaderCityLocation,
   getPostDetails,
-  showSwal,
-  isLogin,
 };

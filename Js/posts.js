@@ -1,13 +1,11 @@
+import { baseUrl, getPostCategories, getPosts } from '../utils/shared.js';
 import {
-  baseUrl,
-  getPostCategories,
-  getPosts,
   addParamToUrl,
   calcuteRelativeTimeDifference,
   getFromLocalStorage,
   getUrlParam,
   removeParamFromUrl,
-} from '../utils/shared';
+} from '../utils/utils.js';
 
 window.addEventListener('load', () => {
   const categoryID = getUrlParam('categoryID');
@@ -16,6 +14,7 @@ window.addEventListener('load', () => {
 
   const cities = getFromLocalStorage('cities');
   const citiesIDs = cities.map((city) => city.id).join('|');
+
   let posts = null;
   let backupPosts = null;
   let appliedFilters = {}; // key-value karkard: 90 / tolid: 1396
