@@ -13,13 +13,13 @@ window.addEventListener('load', () => {
     const loading = document.querySelector('#loading-container');
     loading.style.display = 'none';
 
+    console.log('Post ->', post);
+
     const isUserLogin = await isLogin();
     const token = getToken();
 
     let noteID = null;
     let bookmarkStatus = null;
-
-    console.log(post);
 
     const postTitle = document.querySelector('#post-title');
     const postDescription = document.querySelector('#post-description');
@@ -84,7 +84,13 @@ window.addEventListener('load', () => {
         `
           <li class="post__info-item">
             <span class="post__info-key">${filed.name}</span>
-            <span class="post__info-value">${filed.data}</span>
+            <span class="post__info-value">${
+              typeof filed.data === 'boolean'
+                ? filed.data === true
+                  ? 'دارد'
+                  : 'ندارد'
+                : filed.data
+            }</span>
           </li>
         `
       );
@@ -196,5 +202,50 @@ window.addEventListener('load', () => {
         showModal('login-modal', 'login-modal--active');
       });
     }
+
+    if (post.pics.length) {
+      post.pics.map((pic) => {
+        mainSlider.insertAdjacentHTML(
+          'beforeend',
+          `
+            <div class="swiper-slide">
+              <img src="${baseUrl}/${pic.path}" />
+            </div>
+          `
+        );
+
+        secendSlider.insertAdjacentHTML(
+          'beforeend',
+          `
+            <div class="swiper-slide">
+              <img src="${baseUrl}/${pic.path}" />
+            </div>
+          `
+        );
+      });
+    } else {
+      postPreview.style.display = 'none';
+    }
+
+    const mainSliderConfigs = new Swiper('.mySwiper', {
+      spaceBetween: 10,
+      rewind: true,
+      slidesPerView: 4,
+      freeMode: true,
+      watchSlidesProgress: true,
+    });
+
+    const secondSliderConfigs = new Swiper('.mySwiper2', {
+      spaceBetween: 10,
+      rewind: true,
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+
+      thumbs: {
+        swiper: mainSliderConfigs,
+      },
+    });
   });
 });

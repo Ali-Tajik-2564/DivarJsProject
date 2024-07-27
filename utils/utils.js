@@ -72,13 +72,14 @@ const getToken = () => {
 
 const isLogin = async () => {
   const token = getToken();
-  console.log('Token ->', token);
+  if (!token) {
+    return false;
+  }
   const res = await fetch(`${baseUrl}/v1/auth/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-  console.log('GetMe Respose ->', res);
 
   return res.status === 200 ? true : false;
 };

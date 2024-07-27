@@ -1,4 +1,4 @@
-import { submitNumber, verifyOtp } from '../utils/auth.js';
+import { submitNumber, verifyOtp, requestNewOtp } from '../utils/auth.js';
 import {
   getAllLocations,
   getAndShowHeaderCityLocation,
@@ -39,6 +39,7 @@ window.addEventListener('load', () => {
   const submitPhoneNumberBtn = document.querySelector(
     '.submit_phone_number_btn'
   );
+  const requestNewCodeBtn = document.querySelector('.req_new_code_btn');
 
   const loginBtn = document.querySelector('.login_btn');
 
@@ -449,6 +450,11 @@ window.addEventListener('load', () => {
   loginBtn.addEventListener('click', (event) => {
     event.preventDefault();
     verifyOtp();
+  });
+
+  requestNewCodeBtn.addEventListener('click', (event) => {
+    event.preventDefault();
+    requestNewOtp();
   });
 
   headerCategoryBtn?.addEventListener('click', () => {

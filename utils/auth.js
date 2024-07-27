@@ -93,4 +93,36 @@ const verifyOtp = async () => {
   }
 };
 
-export { submitNumber, verifyOtp };
+const requestNewOtp = async () => {
+  loading.classList.add('active-login-loader');
+  const phoneNumber = phoneNumberInput.value;
+
+  const res = await fetch(`${baseUrl}/v1/auth/send`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ phone: phoneNumber }),
+  });
+
+  if (res.status === 200) {
+    loading.classList.remove('active-login-loader');
+    reqNewCodeBtn.style.display = 'none';
+
+    let count = 30;
+    requestTimerContainer.style.display = 'flex';
+    requestTimer.textContent = '30';
+
+    let timer = setInterval(() => {
+      count--;
+      requestTimer.textContent = count;
+      if (count === 0) {
+        clearInterval(timer);
+        reqNewCodeBtn.style.display = 'block';
+        requestTimerContainer.style.display = 'none';
+      }
+    }, 1000);
+  }
+};
+
+export { submitNumber, verifyOtp, requestNewOtp };
