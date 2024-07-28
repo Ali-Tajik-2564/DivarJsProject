@@ -4,6 +4,7 @@ import {
   getAndShowHeaderCityLocation,
   getAndShowSocials,
   getPostCategories,
+  showPanelLinks,
 } from '../utils/shared.js';
 import {
   addParamToUrl,
@@ -17,6 +18,7 @@ import {
 
 window.addEventListener('load', () => {
   getAndShowSocials();
+  showPanelLinks();
   getAndShowHeaderCityLocation();
 
   let selectedCities = [];
@@ -47,7 +49,7 @@ window.addEventListener('load', () => {
     console.log('Categories ->', categories);
 
     categories.forEach((category) => {
-      categoriesList.insertAdjacentHTML(
+      categoriesList?.insertAdjacentHTML(
         'beforeend',
         `
           <li class="header__category-menu-item" onmouseenter="showActiveCategorySubs('${category._id}')">
@@ -70,10 +72,10 @@ window.addEventListener('load', () => {
         (category) => category._id === categoryID
       );
 
-      categoryResults.innerHTML = '';
+      categoryResults ? (categoryResults.innerHTML = '') : null;
 
       category.subCategories.map((subCategory) => {
-        categoryResults.insertAdjacentHTML(
+        categoryResults?.insertAdjacentHTML(
           'beforeend',
           `
             <div>
@@ -138,7 +140,7 @@ window.addEventListener('load', () => {
       categoryID ? `&categoryID=${categoryID}` : ''
     }`;
 
-    mostSearchedContainer.insertAdjacentHTML(
+    mostSearchedContainer?.insertAdjacentHTML(
       'beforeend',
       `
         <li class="header__searchbar-dropdown-item">
@@ -199,11 +201,11 @@ window.addEventListener('load', () => {
   });
 
   const showProvinces = (data) => {
-    citiesModalList.innerHTML = '';
-    cityModalCities.scrollTo(0, 0);
+    citiesModalList ? (citiesModalList.innerHTML = '') : null;
+    cityModalCities?.scrollTo(0, 0);
 
     data.provinces.forEach((province) => {
-      citiesModalList.insertAdjacentHTML(
+      citiesModalList?.insertAdjacentHTML(
         'beforeend',
         `
           <li
@@ -442,17 +444,17 @@ window.addEventListener('load', () => {
     }
   });
 
-  submitPhoneNumberBtn.addEventListener('click', (event) => {
+  submitPhoneNumberBtn?.addEventListener('click', (event) => {
     event.preventDefault();
     submitNumber();
   });
 
-  loginBtn.addEventListener('click', (event) => {
+  loginBtn?.addEventListener('click', (event) => {
     event.preventDefault();
     verifyOtp();
   });
 
-  requestNewCodeBtn.addEventListener('click', (event) => {
+  requestNewCodeBtn?.addEventListener('click', (event) => {
     event.preventDefault();
     requestNewOtp();
   });
@@ -469,11 +471,11 @@ window.addEventListener('load', () => {
     removeParamFromUrl('categoryID');
   });
 
-  loginModalOverlay.addEventListener('click', () => {
+  loginModalOverlay?.addEventListener('click', () => {
     hideModal('login-modal', 'login-modal--active');
   });
 
-  loginModalCloseIcon.addEventListener('click', () => {
+  loginModalCloseIcon?.addEventListener('click', () => {
     hideModal('login-modal', 'login-modal--active');
   });
 });
